@@ -8,6 +8,7 @@ import ProductCard from './ProductCard';
 import Cart from './Cart';
 import InvoiceGenerator from './InvoiceGenerator';
 import LanguageSwitcher from './LanguageSwitcher';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -130,6 +131,7 @@ const POSDashboard = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <LanguageSwitcher />
             <Button
               variant="secondary"
