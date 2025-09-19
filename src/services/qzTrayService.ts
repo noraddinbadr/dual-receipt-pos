@@ -17,7 +17,7 @@ interface QZConfig {
 class QZTrayService {
   private config: QZConfig = {
     connection: null,
-    printer: ''
+    printer: 'tow pilots demo printer'
   };
 
   // Initialize QZ Tray connection
@@ -34,9 +34,13 @@ class QZTrayService {
         await window.qz.websocket.connect();
       }
 
-      // Get default printer
+      // Get available printers and prefer "tow pilots demo printer"
       const printers = await window.qz.printers.find();
-      if (printers.length > 0) {
+      const preferredPrinter = printers.find(p => p.toLowerCase().includes('tow pilots demo printer'));
+      
+      if (preferredPrinter) {
+        this.config.printer = preferredPrinter;
+      } else if (printers.length > 0) {
         this.config.printer = printers[0];
       }
 
@@ -67,11 +71,13 @@ class QZTrayService {
     // Initialize printer
     commands.push('\x1B\x40'); // Initialize
     
-    // Set character set based on language
+    // Set character set and RTL support for Arabic
     if (isRTL) {
       commands.push('\x1B\x74\x06'); // Arabic character set
+      commands.push('\x1B\x61\x02'); // Right align for RTL
     } else {
       commands.push('\x1B\x74\x00'); // Standard character set
+      commands.push('\x1B\x61\x00'); // Left align for LTR
     }
     
     // Store header
@@ -152,14 +158,21 @@ class QZTrayService {
       }
 
       const commands = this.generateESCPOSCommands(invoice, language);
-      const data = commands.join('');
+      const receiptData = commands.join('');
 
-      const config = window.qz.configs.create(this.config.printer, {
-        encoding: 'UTF-8',
-        raw: true
+      // Configure printer with raw data type as shown in user's configuration
+      const configs = window.qz.configs.create(this.config.printer, {
+        encoding: 'UTF-8'
       });
 
-      await window.qz.print(config, data);
+      // Use raw data format as per user's requirements
+      const data = [{
+        type: 'raw',
+        format: 'plain',
+        data: receiptData
+      }];
+
+      await window.qz.print(configs, data);
       console.log('Invoice printed successfully via QZ Tray');
       return true;
     } catch (error) {
