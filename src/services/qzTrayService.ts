@@ -34,14 +34,22 @@ class QZTrayService {
         await window.qz.websocket.connect();
       }
 
-      // Get available printers and prefer "tow pilots demo printer"
+      // Get available printers and prefer "Tow Pilots Demo Printer"
       const printers = await window.qz.printers.find();
-      const preferredPrinter = printers.find(p => p.toLowerCase().includes('tow pilots demo printer'));
+      console.log('Available printers:', printers);
+      
+      // Search for "Tow Pilots Demo Printer" with case-insensitive matching
+      const preferredPrinter = printers.find(p => 
+        p.toLowerCase().includes('tow pilots demo printer') || 
+        p.toLowerCase() === 'tow pilots demo printer'
+      );
       
       if (preferredPrinter) {
         this.config.printer = preferredPrinter;
+        console.log('Selected printer:', preferredPrinter);
       } else if (printers.length > 0) {
         this.config.printer = printers[0];
+        console.log('Using default printer:', printers[0]);
       }
 
       console.log('QZ Tray connected successfully');
